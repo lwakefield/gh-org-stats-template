@@ -1,0 +1,24 @@
+on:
+  push:
+  schedule:
+    - cron: '0 */6 * * *'
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    container: ghcr.io/lwakefield/gh-org-stats:main
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - env:
+          GH_API_KEY: ${{ secrets.GH_API_KEY }}
+          GH_ORGS: ${{ secrets.GH_ORGS }}
+        run: |
+          /bin/gh-org-stats update $GH_ORGS
+          /bin/gh-org-stats report > report.md
+
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add data.db report.md
+          git commit -m "Update data.db and report.md"
+          git push
