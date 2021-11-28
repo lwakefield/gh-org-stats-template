@@ -13,12 +13,14 @@ jobs:
       - env:
           GH_API_KEY: ${{ secrets.GH_API_KEY }}
           GH_ORGS: ${{ secrets.GH_ORGS }}
-        run: |
-          /bin/gh-org-stats update $GH_ORGS
-          /bin/gh-org-stats report > report.md
+        continue-on-error: true
+        run: /bin/gh-org-stats update $GH_ORGS
+      - run: |
+          rm -rf ./report
+          /bin/gh-org-stats report ./report
 
           git config user.name github-actions
           git config user.email github-actions@github.com
-          git add data.db report.md
-          git commit -m "Update data.db and report.md"
+          git add ./report
+          git commit -m "Update report"
           git push
